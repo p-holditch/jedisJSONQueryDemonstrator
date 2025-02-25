@@ -5,10 +5,14 @@ import redis.clients.jedis.search.IndexOptions;
 import redis.clients.jedis.search.Schema;
 import redis.clients.jedis.search.Schema.Field;
 import redis.clients.jedis.search.Schema.FieldType;
+import redis.clients.jedis.search.SearchResult;
 import redis.clients.jedis.search.aggr.AggregationBuilder;
 import redis.clients.jedis.search.aggr.AggregationResult;
 import redis.clients.jedis.search.aggr.Reducers;
 import redis.clients.jedis.search.aggr.Row;
+import redis.clients.jedis.search.Document;
+import redis.clients.jedis.search.Query;
+
 
 
 import java.time.format.DateTimeFormatter;
@@ -16,6 +20,7 @@ import java.time.LocalDate;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.List;
 
 
 public class RedisClient {
@@ -45,6 +50,7 @@ public class RedisClient {
                     today.withDayOfYear(i).toString(),
                     today.withDayOfYear(i + rand.nextInt(3)).toString(),
                     "Name_" + (i % 40),
+                    "Customer" + (i%40) + "@email.com",
                     (i % 40));
             this.jedisPooled.jsonSet(key, gson.toJson(booking));
 
@@ -63,7 +69,8 @@ public class RedisClient {
         // Define the index schema
         Schema schema = new Schema()
                 .addField(new Field("$.location", FieldType.TEXT)).as("location")
-                .addField(new Field("$.customerName", FieldType.TEXT)).as("customerName");
+                .addField(new Field("$.customerName", FieldType.TEXT)).as("customerName")
+                .addField(new Field("$.customerEmail", FieldType.TAG)).as("customerEmail");
 
         try {
             // Create the index
@@ -95,6 +102,7 @@ public class RedisClient {
                                 startDate,
                                 endDate,
                                 "Customer_" + (threadId + 1),
+                                "Customer+" + (threadId + 1) + "@email.com" ,
                                 threadId + 1
                         );
 
@@ -138,6 +146,13 @@ public class RedisClient {
             while (!executorService.isTerminated()) {
                 // Wait for all threads to finish
             }
+
+            SearchResult sr = this.jedisPooled.ftSearch(indexName, new Query("@customerEmail:{\"Customer10@email.com\"}").dialect(2));
+            System.out.println("There are " + sr.getTotalResults() + " documents with email Customer10@email.com:");
+            List<Document> bookingList = sr.getDocuments();
+            for (Document doc: bookingList) {
+                System.out.println(doc.getId());
+            }
         } catch( Exception e) {
             System.err.println("Problem creating threads: " + e.getMessage());
         }
@@ -147,5 +162,7 @@ public class RedisClient {
         RedisClient client = new RedisClient("localhost", 6379);
         client.populateRedis();
         client.executeRedisCommands();
+
+
     }
 }

@@ -4,15 +4,17 @@ public class Booking {
     private String startDate;
     private String endDate;
     private String customerName;
+    private String customerEmail;
     private int customerId;
 
     // Constructor
-    public Booking(int reference, String location, String startDate, String endDate, String customerName, int customerId) {
+    public Booking(int reference, String location, String startDate, String endDate, String customerName, String customerEmail, int customerId) {
         this.reference = reference;
         this.location = location;
         this.startDate = startDate;
         this.endDate = endDate;
         this.customerName = customerName;
+        this.customerEmail = customerEmail;
         this.customerId = customerId;
     }
 
@@ -57,6 +59,14 @@ public class Booking {
         this.customerName = customerName;
     }
 
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
     public int getCustomerId() {
         return customerId;
     }
@@ -73,6 +83,7 @@ public class Booking {
                 ", startDate='" + startDate + '\'' +
                 ", endDate='" + endDate + '\'' +
                 ", customerName='" + customerName + '\'' +
+                ", customerEmail='" + customerEmail + '\'' +
                 ", customerId=" + customerId +
                 '}';
     }
