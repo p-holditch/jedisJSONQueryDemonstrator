@@ -153,6 +153,14 @@ public class RedisClient {
             for (Document doc: bookingList) {
                 System.out.println(doc.getId());
             }
+
+            sr = this.jedisPooled.ftSearch(indexName, new Query("@customerEmail:{\"jane.aberg@gmail.com\"}").dialect(2));
+            System.out.println("There are " + sr.getTotalResults() + " documents with email jane.aberg@gmail.com:");
+            bookingList = sr.getDocuments();
+            for (Document doc: bookingList) {
+                System.out.println(doc.getId());
+            }
+
         } catch( Exception e) {
             System.err.println("Problem creating threads: " + e.getMessage());
         }
